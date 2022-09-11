@@ -27,6 +27,7 @@ public class MainClass extends JFrame {
     private JButton DeleteInv;
     private JButton SaveBtn;
     private JButton CancelBtn;
+    private JButton DeleteBtn;
 
     private JLabel InvTable;
     private JLabel InvNum;
@@ -60,6 +61,7 @@ public class MainClass extends JFrame {
          DeleteInv = new JButton();
          SaveBtn = new JButton();
          CancelBtn = new JButton();
+         DeleteBtn = new JButton();
 
          InvTable = new JLabel();
          InvNum = new JLabel();
@@ -95,6 +97,7 @@ public class MainClass extends JFrame {
          DeleteInv.setText("Delete Invoice");
          SaveBtn.setText("Save");
          CancelBtn.setText("Cancel");
+         DeleteBtn.setText("Delete Item");
 
          InvTable.setText("Invoices Table");
          InvNum.setText("Invoice Number");
@@ -141,6 +144,7 @@ public class MainClass extends JFrame {
 
          SaveBtn.setBounds(30,600,200,30);
          CancelBtn.setBounds(250,600,200,30);
+         DeleteBtn.setBounds(470,600,200,30);
          InvNum.setBounds(30,40,100,30);
          InvCount.setBounds(150,40,100,30);
          InvDate.setBounds(30,70,100,30);
@@ -167,6 +171,7 @@ public class MainClass extends JFrame {
          Rightpanel.add(scroll2);
          Rightpanel.add(SaveBtn);
          Rightpanel.add(CancelBtn);
+         Rightpanel.add(DeleteBtn);
 
 
          add(Leftpanel);
@@ -180,44 +185,14 @@ public class MainClass extends JFrame {
 
          InvoiceTablemodel.setRowCount(0);
 
-//         try {
-//             File myObj = new File("DataFiles/InvoiceHeader.csv");
-//             Scanner myReader = new Scanner(myObj);
-//             while (myReader.hasNextLine()) {
-//                 String data = myReader.nextLine();
-//                 data += ",0";
-//                 String[] dataLine = data.split(",");
-//                 InvoiceTablemodel.addRow(dataLine);
-//             }
-//             myReader.close();
-//         } catch (FileNotFoundException e1) {
-//             System.out.println("An error occurred.");
-//             e1.printStackTrace();
-//         }
 
-         ArrayList<InvoiceHeader> InVlist = FileOperations.readFile();
+         ArrayList<InvoiceHeader> InVlist = FileOperations.readFile("DataFiles/InvoiceHeader.csv");
          for (int i = 0; i < InVlist.size(); i++) {
              InvoiceTablemodel.addRow(new Object[]{InVlist.get(i).getInvNumber(),
                      InVlist.get(i).getDate(),InVlist.get(i).getCustomerName(),InVlist.get(i).getTotalAmt()});
          }
 
-
-//         List<String> InvItemList = new ArrayList<String>();
-//         try {
-//             File myObj = new File("DataFiles/InvoiceLine.csv");
-//             Scanner myReader = new Scanner(myObj);
-//             while (myReader.hasNextLine()) {
-//                 String data = myReader.nextLine();
-//                 String[] dataLine = data.split(",");
-//                 InvItemList.add(data+"," + (Integer.parseInt(dataLine[2]) * Integer.parseInt(dataLine[3])) );
-//             }
-//             myReader.close();
-
-//     } catch (Exception e1) {
-//        System.out.println("An error occurred.");
-//        e1.printStackTrace();
-//    }
-             ArrayList<InvoiceLine> InvItemList = FileOperations.InvItemreadFile();
+             ArrayList<InvoiceLine> InvItemList = FileOperations.InvItemreadFile("DataFiles/InvoiceLine.csv");
 
 
              //Adding Items To total Invoice Amount
@@ -334,52 +309,87 @@ public class MainClass extends JFrame {
 
              }
          });
+         DeleteBtn.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+                 //TODO: Write Your code
+                 if(InvItemsTable.getSelectedRow() != -1) {
+                     // remove selected row from the model
+                     int selectedRows = InvItemsTable.getSelectedRow();
+                     String CustID = InvItemModel1.getValueAt(selectedRows,1).toString();
+                     for (int i = 0; i < InvItemList.size(); i++) {
+                         if ((InvItemList.get(i).getItemName()).equals(CustID)){
+                             InvItemList.remove(i);
+                         }
+                     }
+                     InvItemModel1.removeRow(selectedRows);
+
+                     InvItemsTable.addNotify();
+                     JOptionPane.showMessageDialog(null, "Selected row deleted successfully");
+                 }else {
+                     JOptionPane.showMessageDialog(null, "Kindly Select row to delete");
+                 }
+             }
+         });
+
          LoadFile.addActionListener(new ActionListener() {
              @Override
              public void actionPerformed(ActionEvent e) {
-                 try {
-                     InvoiceTablemodel.setRowCount(0);
-
-                     File myObj = new File("DataFiles/EditedInvoiceHeader.csv");
-                     Scanner myReader = new Scanner(myObj);
-                     while (myReader.hasNextLine()) {
-                         String data = myReader.nextLine();
-                         data += ",0";
-                         String[] dataLine = data.split(",");
-                         InvoiceTablemodel.addRow(dataLine);
-                     }
-                     myReader.close();
-                 } catch (FileNotFoundException e1) {
-                     System.out.println("An error occurred.");
-                     e1.printStackTrace();
+                 JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+                 int returnValue = jfc.showOpenDialog(null);
+                 File selectedFile = null;
+                 if (returnValue == JFileChooser.APPROVE_OPTION) {
+                     selectedFile = jfc.getSelectedFile();
                  }
 
-                 List<String> InvItemList = new ArrayList<String>();
-                 try {
-                     File myObj = new File("DataFiles/EditedInvoiceLine.csv");
-                     Scanner myReader = new Scanner(myObj);
-                     int CustomerTotInvAmt = 0;
-                     String Customer_id = "";
-                     while (myReader.hasNextLine()) {
-                         String data = myReader.nextLine();
-                         String[] dataLine = data.split(",");
-                         InvItemList.add(data+"," + (Integer.parseInt(dataLine[2]) * Integer.parseInt(dataLine[3])) );
+                 DefaultTableModel InvoiceTablemodel = (DefaultTableModel) InvoiceTable.getModel();
+                 DefaultTableModel InvItemsTablemodel = (DefaultTableModel) InvItemsTable.getModel();
+
+                 if (selectedFile.getName().contains("InvoiceHeader.csv")) {
+                     InvoiceTablemodel.setRowCount(0);
+                     ArrayList<InvoiceHeader> InVlist = FileOperations.readFile(selectedFile.getAbsolutePath());
+                     for (int i = 0; i < InVlist.size(); i++) {
+                         InvoiceTablemodel.addRow(new Object[]{InVlist.get(i).getInvNumber(),
+                                 InVlist.get(i).getDate(), InVlist.get(i).getCustomerName(), InVlist.get(i).getTotalAmt()});
                      }
-                     myReader.close();
-                     for (int i = 0; i < InvItemList.size(); i++) {
+                 }
+                 if (selectedFile.getName().contains("InvoiceLine.csv")) {
+                     InvItemsTablemodel.setRowCount(0);
+                     ArrayList<InvoiceLine> InvItemList1 = FileOperations.InvItemreadFile(selectedFile.getAbsolutePath());
+
+                     InvItemList.clear();
+                     InvItemList.addAll(InvItemList1);
+                     for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
+                         InvoiceTablemodel.setValueAt(0d , j, 3);
+                     }
+                     //Adding Items To total Invoice Amount
+                     for (int i = 0; i < InvItemList1.size(); i++) {
                          for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
-                             if (InvoiceTablemodel.getValueAt(j,0).equals(InvItemList.get(i).split(",")[0]))
-                             {
-                                 InvoiceTablemodel.setValueAt(Integer.parseInt(InvoiceTablemodel.getValueAt(j,3).toString())+ Integer.parseInt(InvItemList.get(i).split(",")[4]),j,3);
+                             if ((InvoiceTablemodel.getValueAt(j, 0) + "").equals(InvItemList1.get(i).getInvNumber() + "")) {
+                                 Double TableValue = Double.parseDouble(InvoiceTablemodel.getValueAt(j, 3).toString());
+                                 Double ItemPrice = InvItemList1.get(i).getItemFullPrice();
+                                 InvoiceTablemodel.setValueAt(TableValue + ItemPrice
+                                         , j, 3);
                              }
                          }
                      }
-                     JOptionPane.showMessageDialog(null, "Load File successfully");
-
-                 } catch (FileNotFoundException e1) {
-                     System.out.println("An error occurred.");
-                     e1.printStackTrace();
                  }
+
+
+                 for (int i = 0; i < InVlist.size(); i++) {
+                     String out =  "Invoice" + InVlist.get(i).getInvNumber()+"\n" +
+                             "{\n" +
+                             "\t" + InVlist.get(i).getDate()+","+InVlist.get(i).getCustomerName()+"\n";
+                     for (int j = 0; j < InvItemList.size(); j++) {
+                         if (InVlist.get(i).getInvNumber() == InvItemList.get(j).getInvNumber())
+                             out += "\t" + InvItemList.get(j).getItemName()+"," + InvItemList.get(j).getItemPrice()
+                                     + ","+ InvItemList.get(j).getQuantity()+ "\n";
+                     }
+                     out += "}";
+                     System.out.println(out);
+                 }
+
+
              }
          });
          SaveFile.addActionListener(new ActionListener() {
@@ -390,10 +400,6 @@ public class MainClass extends JFrame {
                  ArrayList<InvoiceHeader> EditInvList = new ArrayList<>();
 
                  for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
-//                     fileContent +=  InvoiceTablemodel.getValueAt(j,0).toString() + ","
-//                             + InvoiceTablemodel.getValueAt(j,1).toString() + ","
-//                             + InvoiceTablemodel.getValueAt(j,2).toString() + ","
-//                             + InvoiceTablemodel.getValueAt(j,3).toString() + "\r\n";
 
                      InvoiceHeader inv = new InvoiceHeader();
                      inv.setInvNumber(Integer.parseInt(InvoiceTablemodel.getValueAt(j,0).toString()));
