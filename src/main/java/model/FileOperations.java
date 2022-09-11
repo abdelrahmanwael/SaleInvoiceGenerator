@@ -11,11 +11,11 @@ import java.util.Scanner;
 
 public class FileOperations {
 
-    public static ArrayList<InvoiceHeader> readFile(String FilePath){
+    public static ArrayList<InvoiceHeader> readFile(String Path){
         ArrayList<InvoiceHeader> InvHDRList = new ArrayList<InvoiceHeader>();
 
         try {
-            File myObj = new File(FilePath);
+            File myObj = new File(Path);
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
                 InvoiceHeader invHdr = new InvoiceHeader();
@@ -34,11 +34,11 @@ public class FileOperations {
         }
         return InvHDRList;
     }
-    public static ArrayList<InvoiceLine> InvItemreadFile(String FilePath){
+    public static ArrayList<InvoiceLine> InvItemreadFile(String Path){
         ArrayList<InvoiceLine> InvItemList = new ArrayList<InvoiceLine>();
 
         try {
-            File myObj = new File(FilePath);
+            File myObj = new File(Path);
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
                 InvoiceLine InvItem = new InvoiceLine();
