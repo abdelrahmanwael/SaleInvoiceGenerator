@@ -25,6 +25,7 @@ public class MainJframeView extends JFrame {
     private JButton SaveBtn;
     private JButton CancelBtn;
     private JButton DeleteBtn;
+    private JButton CreateLineBtn;
 
     private JLabel InvTable;
     private JLabel InvNum;
@@ -59,6 +60,7 @@ public class MainJframeView extends JFrame {
         SaveBtn = new JButton();
         CancelBtn = new JButton();
         DeleteBtn = new JButton();
+        CreateLineBtn = new JButton();
 
         InvTable = new JLabel();
         InvNum = new JLabel();
@@ -95,6 +97,7 @@ public class MainJframeView extends JFrame {
         SaveBtn.setText("Save");
         CancelBtn.setText("Cancel");
         DeleteBtn.setText("Delete Item");
+        CreateLineBtn.setText("Create New Item");
 
         InvTable.setText("Invoices Table");
         InvNum.setText("Invoice Number");
@@ -139,9 +142,11 @@ public class MainJframeView extends JFrame {
 
         Rightpanel.setLayout(null);
 
-        SaveBtn.setBounds(30,600,200,30);
-        CancelBtn.setBounds(250,600,200,30);
-        DeleteBtn.setBounds(470,600,200,30);
+        SaveBtn.setBounds(30,600,100,30);
+        CancelBtn.setBounds(150,600,100,30);
+        DeleteBtn.setBounds(270,600,100,30);
+        CreateLineBtn.setBounds(390,600,150,30);
+
         InvNum.setBounds(30,40,100,30);
         InvCount.setBounds(150,40,100,30);
         InvDate.setBounds(30,70,100,30);
@@ -169,6 +174,7 @@ public class MainJframeView extends JFrame {
         Rightpanel.add(SaveBtn);
         Rightpanel.add(CancelBtn);
         Rightpanel.add(DeleteBtn);
+        Rightpanel.add(CreateLineBtn);
 
 
         add(Leftpanel);
@@ -179,8 +185,10 @@ public class MainJframeView extends JFrame {
         //Load Last inital status
         DefaultTableModel InvoiceTablemodel = (DefaultTableModel) InvoiceTable.getModel();
         DefaultTableModel InvItemModel1 = (DefaultTableModel) InvItemsTable.getModel();
+        ArrayList<InvoiceLine> InvItemList = new ArrayList<>();
+        ArrayList<InvoiceHeader> InVlist = new ArrayList<>();
 
-        InvoiceTablemodel.setRowCount(0);
+        /*InvoiceTablemodel.setRowCount(0);
 
 
         ArrayList<InvoiceHeader> InVlist = FileOperations.readFile("DataFiles/InvoiceHeader.csv");
@@ -215,7 +223,7 @@ public class MainJframeView extends JFrame {
             }
             out += "}";
             System.out.println(out);
-        }
+        }*/
 
         InvoiceTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
             public void valueChanged(ListSelectionEvent event) {
@@ -264,7 +272,7 @@ public class MainJframeView extends JFrame {
         SaveBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Controller.savebtn(InvoiceTablemodel,CustomerNameTxt,InvDateTxt,InvoiceTable,InvCount);
+                Controller.savebtn(InvoiceTablemodel,CustomerNameTxt,InvDateTxt,InvoiceTable,InvCount,InvItemList,InvItemModel1);
             }
         });
         CancelBtn.addActionListener(new ActionListener() {
@@ -276,10 +284,15 @@ public class MainJframeView extends JFrame {
         DeleteBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Controller.DeleteBtn(InvItemsTable,InvItemModel1,InvItemList);
+                Controller.DeleteBtn(InvItemsTable,InvItemModel1,InvItemList,InvoiceTablemodel);
             }
         });
-
+        CreateLineBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                InvItemModel1.addRow(new Object[]{"", "", "", ""});
+            }
+        });
         LoadFile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -295,11 +308,12 @@ public class MainJframeView extends JFrame {
 
                 if (selectedFile.getName().contains("InvoiceHeader.csv")) {
                     InvoiceTablemodel.setRowCount(0);
-                    ArrayList<InvoiceHeader> InVlist = FileOperations.readFile(selectedFile.getAbsolutePath());
-                    for (int i = 0; i < InVlist.size(); i++) {
-                        InvoiceTablemodel.addRow(new Object[]{InVlist.get(i).getInvNumber(),
-                                InVlist.get(i).getDate(), InVlist.get(i).getCustomerName(), InVlist.get(i).getTotalAmt()});
+                    ArrayList<InvoiceHeader> InVlist1 = FileOperations.readFile(selectedFile.getAbsolutePath());
+                    for (int i = 0; i < InVlist1.size(); i++) {
+                        InvoiceTablemodel.addRow(new Object[]{InVlist1.get(i).getInvNumber(),
+                                InVlist1.get(i).getDate(), InVlist1.get(i).getCustomerName(), InVlist1.get(i).getTotalAmt()});
                     }
+                    InVlist.addAll(InVlist1);
                 }
                 if (selectedFile.getName().contains("InvoiceLine.csv")) {
                     InvItemsTablemodel.setRowCount(0);
@@ -357,8 +371,18 @@ public class MainJframeView extends JFrame {
                     EditInvList.add(inv);
                 }
                 FileOperations.Write(EditInvList);
+                ArrayList<InvoiceLine> InvItemListEdit = new ArrayList<InvoiceLine>();
 
-                FileOperations.InvItemWrite(InvItemList);
+                for (int i = 0; i < InvItemList.size(); i++) {
+                    InvoiceLine Item = new InvoiceLine();
+                    Item.setInvNumber(Integer.parseInt(InvItemModel1.getValueAt(i,0).toString()));
+                    Item.setItemName(InvItemModel1.getValueAt(i,1).toString());
+                    Item.setItemPrice(Double.parseDouble(InvItemModel1.getValueAt(i,2).toString()));
+                    Item.setQuantity(Integer.parseInt(InvItemModel1.getValueAt(i,2).toString()));
+                    InvItemListEdit.add(Item);
+                }
+
+                FileOperations.InvItemWrite(InvItemListEdit);
 
             }
 
