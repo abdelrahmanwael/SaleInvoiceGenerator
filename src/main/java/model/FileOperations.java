@@ -64,7 +64,7 @@ public class FileOperations {
                     + InvHdrList.get(i).getCustomerName() + "," + InvHdrList.get(i).getTotalAmt() + "\r\n";
         }
         try {
-            String FileName = "DataFiles/EditedInvoiceHeader.csv";
+            String FileName = "DataFiles/InvoiceHeader.csv";
             FileWriter fw = new FileWriter(FileName, false); //the true will append the new data
             fw.write(fileContent);//appends the string to the file
             fw.close();
@@ -76,7 +76,7 @@ public class FileOperations {
     public static void InvItemWrite(ArrayList<InvoiceLine> InvItemList) {
         String fileContent = "";
         for (int j = 0; j < InvItemList.size(); j++) {
-            fileContent += InvItemList.get(j).getInvNumber()+","
+            fileContent += ""
                     +InvItemList.get(j).getInvNumber()+","
                     +InvItemList.get(j).getItemName() +","
                     +InvItemList.get(j).getItemPrice() +","
@@ -86,7 +86,7 @@ public class FileOperations {
         }
 
         try {
-            String FileName = "DataFiles/EditedInvoiceLine.csv";
+            String FileName = "DataFiles/InvoiceLine.csv";
             FileWriter fw = new FileWriter(FileName,false); //the true will append the new data
             fw.write(fileContent);//appends the string to the file
             fw.close();

@@ -22,8 +22,6 @@ public class MainJframeView extends JFrame {
     private JPanel Rightpanel;
     private JButton CreateInv;
     private JButton DeleteInv;
-    private JButton SaveBtn;
-    private JButton CancelBtn;
     private JButton DeleteBtn;
     private JButton CreateLineBtn;
 
@@ -57,8 +55,6 @@ public class MainJframeView extends JFrame {
 
         CreateInv = new JButton();
         DeleteInv = new JButton();
-        SaveBtn = new JButton();
-        CancelBtn = new JButton();
         DeleteBtn = new JButton();
         CreateLineBtn = new JButton();
 
@@ -94,8 +90,6 @@ public class MainJframeView extends JFrame {
 
         CreateInv.setText("Create New Invoice");
         DeleteInv.setText("Delete Invoice");
-        SaveBtn.setText("Save");
-        CancelBtn.setText("Cancel");
         DeleteBtn.setText("Delete Item");
         CreateLineBtn.setText("Create New Item");
 
@@ -131,7 +125,7 @@ public class MainJframeView extends JFrame {
         CreateInv.setBounds(30,600,200,30);
         DeleteInv.setBounds(250,600,200,30);
         InvTable.setBounds(30,0,200,30);
-        scroll1.setBounds(30,65,600,450);
+        scroll1.setBounds(30,65,600,500);
         Leftpanel.setLayout(null);
 
         InvTable.setSize(1000,100);
@@ -142,10 +136,8 @@ public class MainJframeView extends JFrame {
 
         Rightpanel.setLayout(null);
 
-        SaveBtn.setBounds(30,600,100,30);
-        CancelBtn.setBounds(150,600,100,30);
-        DeleteBtn.setBounds(270,600,100,30);
-        CreateLineBtn.setBounds(390,600,150,30);
+        CreateLineBtn.setBounds(30,600,150,30);
+        DeleteBtn.setBounds(190,600,150,30);
 
         InvNum.setBounds(30,40,100,30);
         InvCount.setBounds(150,40,100,30);
@@ -171,8 +163,6 @@ public class MainJframeView extends JFrame {
         Rightpanel.add(InvItems);
         Rightpanel.add(CustomerNameTxt);
         Rightpanel.add(scroll2);
-        Rightpanel.add(SaveBtn);
-        Rightpanel.add(CancelBtn);
         Rightpanel.add(DeleteBtn);
         Rightpanel.add(CreateLineBtn);
 
@@ -185,10 +175,9 @@ public class MainJframeView extends JFrame {
         //Load Last inital status
         DefaultTableModel InvoiceTablemodel = (DefaultTableModel) InvoiceTable.getModel();
         DefaultTableModel InvItemModel1 = (DefaultTableModel) InvItemsTable.getModel();
-        ArrayList<InvoiceLine> InvItemList = new ArrayList<>();
-        ArrayList<InvoiceHeader> InVlist = new ArrayList<>();
 
-        /*InvoiceTablemodel.setRowCount(0);
+
+        InvoiceTablemodel.setRowCount(0);
 
 
         ArrayList<InvoiceHeader> InVlist = FileOperations.readFile("DataFiles/InvoiceHeader.csv");
@@ -223,7 +212,7 @@ public class MainJframeView extends JFrame {
             }
             out += "}";
             System.out.println(out);
-        }*/
+        }
 
         InvoiceTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
             public void valueChanged(ListSelectionEvent event) {
@@ -259,7 +248,33 @@ public class MainJframeView extends JFrame {
         CreateInv.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                InvoiceTablemodel.addRow(new Object[]{"", "", ""});
+
+                JTextField field1 = new JTextField();
+                JTextField field2 = new JTextField();
+                JPanel panel = new JPanel(new GridLayout(0, 1));
+                panel.add(new JLabel("Invoice Date:"));
+                panel.add(field1);
+                panel.add(new JLabel("Customer Name:"));
+                panel.add(field2);
+                int result = JOptionPane.showConfirmDialog(null, panel, "Create Invoice",
+                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    InvoiceHeader InvHdr = new InvoiceHeader();
+                    if (InvoiceTablemodel.getRowCount() >0 ){
+                        InvHdr.setInvNumber(Integer.parseInt(InvoiceTablemodel.getValueAt((InvoiceTablemodel.getRowCount()-1),0).toString()) + 1);
+                        InvoiceTablemodel.addRow(new Object[]{Integer.parseInt(InvoiceTablemodel.getValueAt((InvoiceTablemodel.getRowCount()-1),
+                                0).toString()) + 1, field1.getText(), field2.getText(),0.0d});
+                    }else {
+                        InvHdr.setInvNumber(1);
+                    }
+                    InvHdr.setDate(field1.getText());
+                    InvHdr.setCustomerName(field2.getText());
+                    InvHdr.setTotalAmt(0.0d);
+                    InVlist.add(InvHdr);
+                } else {
+                    System.out.println("Cancelled");
+                }
+
             }
         });
         DeleteInv.addActionListener(new ActionListener() {
@@ -269,18 +284,8 @@ public class MainJframeView extends JFrame {
             }
         });
 
-        SaveBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Controller.savebtn(InvoiceTablemodel,CustomerNameTxt,InvDateTxt,InvoiceTable,InvCount,InvItemList,InvItemModel1);
-            }
-        });
-        CancelBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Controller.CancelBtn(InvoiceTablemodel,CustomerNameTxt,InvDateTxt,InvoiceTable,InvCount);
-            }
-        });
+
+
         DeleteBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -290,68 +295,111 @@ public class MainJframeView extends JFrame {
         CreateLineBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                InvItemModel1.addRow(new Object[]{"", "", "", ""});
+                if (InvoiceTable.getSelectedRow() != -1) {
+                    JTextField field1 = new JTextField();
+                    JTextField field2 = new JTextField();
+                    JTextField field3 = new JTextField();
+
+                    JPanel panel = new JPanel(new GridLayout(0, 1));
+                    panel.add(new JLabel("Item name:"));
+                    panel.add(field1);
+                    panel.add(new JLabel("Item Count:"));
+                    panel.add(field2);
+                    panel.add(new JLabel("Item Price:"));
+                    panel.add(field3);
+                    int result = JOptionPane.showConfirmDialog(null, panel, "Create Item",
+                            JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    if (result == JOptionPane.OK_OPTION) {
+
+                        InvoiceLine Item = new InvoiceLine();
+                        Item.setInvNumber(Integer.parseInt(InvoiceTable.getValueAt((InvoiceTable.getSelectedRow()), 0).toString()));
+                        Item.setItemName(field1.getText());
+                        Item.setItemPrice(Double.parseDouble(field3.getText()));
+                        Item.setQuantity(Integer.parseInt(field2.getText()));
+                        InvItemList.add(Item);
+                        InvItemModel1.addRow(new Object[]{Item.getInvNumber()
+                                , Item.getItemName(),Item.getItemPrice(), Item.getQuantity(), Item.getItemFullPrice()});
+                        for (int i = 0; i < InvoiceTablemodel.getRowCount(); i++) {
+                            if (Integer.parseInt(InvoiceTablemodel.getValueAt(i,0).toString()) == Item.getInvNumber()){
+                                int sum = 0;
+                                for (int j = 0; j < InvItemList.size(); j++) {
+                                    if (Item.getInvNumber() == InvItemList.get(j).getInvNumber()){
+                                        sum += InvItemList.get(j).getItemFullPrice();
+                                    }
+                                }
+                                InvoiceTablemodel.setValueAt(sum,i,3);
+                            }
+                        }
+                    } else {
+                        System.out.println("Cancelled");
+                    }
+                }else {
+                    JOptionPane.showMessageDialog(null, "Kindly Select Invoice to add Item in");
+                }
             }
         });
         LoadFile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-                int returnValue = jfc.showOpenDialog(null);
-                File selectedFile = null;
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    selectedFile = jfc.getSelectedFile();
-                }
+                for (int k = 0; k < 2; k++) {
 
-                DefaultTableModel InvoiceTablemodel = (DefaultTableModel) InvoiceTable.getModel();
-                DefaultTableModel InvItemsTablemodel = (DefaultTableModel) InvItemsTable.getModel();
 
-                if (selectedFile.getName().contains("InvoiceHeader.csv")) {
-                    InvoiceTablemodel.setRowCount(0);
-                    ArrayList<InvoiceHeader> InVlist1 = FileOperations.readFile(selectedFile.getAbsolutePath());
-                    for (int i = 0; i < InVlist1.size(); i++) {
-                        InvoiceTablemodel.addRow(new Object[]{InVlist1.get(i).getInvNumber(),
-                                InVlist1.get(i).getDate(), InVlist1.get(i).getCustomerName(), InVlist1.get(i).getTotalAmt()});
+                    JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+                    int returnValue = jfc.showOpenDialog(null);
+                    File selectedFile = null;
+                    if (returnValue == JFileChooser.APPROVE_OPTION) {
+                        selectedFile = jfc.getSelectedFile();
                     }
-                    InVlist.addAll(InVlist1);
-                }
-                if (selectedFile.getName().contains("InvoiceLine.csv")) {
-                    InvItemsTablemodel.setRowCount(0);
-                    ArrayList<InvoiceLine> InvItemList1 = FileOperations.InvItemreadFile(selectedFile.getAbsolutePath());
 
-                    InvItemList.clear();
-                    InvItemList.addAll(InvItemList1);
-                    for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
-                        InvoiceTablemodel.setValueAt(0d , j, 3);
+                    DefaultTableModel InvoiceTablemodel = (DefaultTableModel) InvoiceTable.getModel();
+                    DefaultTableModel InvItemsTablemodel = (DefaultTableModel) InvItemsTable.getModel();
+
+                    if (selectedFile.getName().contains("InvoiceHeader.csv")) {
+                        InvoiceTablemodel.setRowCount(0);
+                        ArrayList<InvoiceHeader> InVlist1 = FileOperations.readFile(selectedFile.getAbsolutePath());
+                        for (int i = 0; i < InVlist1.size(); i++) {
+                            InvoiceTablemodel.addRow(new Object[]{InVlist1.get(i).getInvNumber(),
+                                    InVlist1.get(i).getDate(), InVlist1.get(i).getCustomerName(), InVlist1.get(i).getTotalAmt()});
+                        }
+                        InVlist.addAll(InVlist1);
                     }
-                    //Adding Items To total Invoice Amount
-                    for (int i = 0; i < InvItemList1.size(); i++) {
+                    if (selectedFile.getName().contains("InvoiceLine.csv")) {
+                        InvItemsTablemodel.setRowCount(0);
+                        ArrayList<InvoiceLine> InvItemList1 = FileOperations.InvItemreadFile(selectedFile.getAbsolutePath());
+
+                        InvItemList.clear();
+                        InvItemList.addAll(InvItemList1);
                         for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
-                            if ((InvoiceTablemodel.getValueAt(j, 0) + "").equals(InvItemList1.get(i).getInvNumber() + "")) {
-                                Double TableValue = Double.parseDouble(InvoiceTablemodel.getValueAt(j, 3).toString());
-                                Double ItemPrice = InvItemList1.get(i).getItemFullPrice();
-                                InvoiceTablemodel.setValueAt(TableValue + ItemPrice
-                                        , j, 3);
+                            InvoiceTablemodel.setValueAt(0d , j, 3);
+                        }
+                        //Adding Items To total Invoice Amount
+                        for (int i = 0; i < InvItemList1.size(); i++) {
+                            for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
+                                if ((InvoiceTablemodel.getValueAt(j, 0) + "").equals(InvItemList1.get(i).getInvNumber() + "")) {
+                                    Double TableValue = Double.parseDouble(InvoiceTablemodel.getValueAt(j, 3).toString());
+                                    Double ItemPrice = InvItemList1.get(i).getItemFullPrice();
+                                    InvoiceTablemodel.setValueAt(TableValue + ItemPrice
+                                            , j, 3);
+                                }
                             }
                         }
                     }
-                }
 
 
-                for (int i = 0; i < InVlist.size(); i++) {
-                    String out =  "Invoice" + InVlist.get(i).getInvNumber()+"\n" +
-                            "{\n" +
-                            "\t" + InVlist.get(i).getDate()+","+InVlist.get(i).getCustomerName()+"\n";
-                    for (int j = 0; j < InvItemList.size(); j++) {
-                        if (InVlist.get(i).getInvNumber() == InvItemList.get(j).getInvNumber())
-                            out += "\t" + InvItemList.get(j).getItemName()+"," + InvItemList.get(j).getItemPrice()
-                                    + ","+ InvItemList.get(j).getQuantity()+ "\n";
+                    for (int i = 0; i < InVlist.size(); i++) {
+                        String out =  "Invoice" + InVlist.get(i).getInvNumber()+"\n" +
+                                "{\n" +
+                                "\t" + InVlist.get(i).getDate()+","+InVlist.get(i).getCustomerName()+"\n";
+                        for (int j = 0; j < InvItemList.size(); j++) {
+                            if (InVlist.get(i).getInvNumber() == InvItemList.get(j).getInvNumber())
+                                out += "\t" + InvItemList.get(j).getItemName()+"," + InvItemList.get(j).getItemPrice()
+                                        + ","+ InvItemList.get(j).getQuantity()+ "\n";
+                        }
+                        out += "}";
+                        System.out.println(out);
                     }
-                    out += "}";
-                    System.out.println(out);
+
                 }
-
-
             }
         });
         SaveFile.addActionListener(new ActionListener() {
@@ -371,18 +419,10 @@ public class MainJframeView extends JFrame {
                     EditInvList.add(inv);
                 }
                 FileOperations.Write(EditInvList);
-                ArrayList<InvoiceLine> InvItemListEdit = new ArrayList<InvoiceLine>();
 
-                for (int i = 0; i < InvItemList.size(); i++) {
-                    InvoiceLine Item = new InvoiceLine();
-                    Item.setInvNumber(Integer.parseInt(InvItemModel1.getValueAt(i,0).toString()));
-                    Item.setItemName(InvItemModel1.getValueAt(i,1).toString());
-                    Item.setItemPrice(Double.parseDouble(InvItemModel1.getValueAt(i,2).toString()));
-                    Item.setQuantity(Integer.parseInt(InvItemModel1.getValueAt(i,2).toString()));
-                    InvItemListEdit.add(Item);
-                }
 
-                FileOperations.InvItemWrite(InvItemListEdit);
+
+                FileOperations.InvItemWrite(InvItemList);
 
             }
 
