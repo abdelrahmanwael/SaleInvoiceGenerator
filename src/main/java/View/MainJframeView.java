@@ -175,44 +175,45 @@ public class MainJframeView extends JFrame {
         //Load Last inital status
         DefaultTableModel InvoiceTablemodel = (DefaultTableModel) InvoiceTable.getModel();
         DefaultTableModel InvItemModel1 = (DefaultTableModel) InvItemsTable.getModel();
+        ArrayList<InvoiceHeader> InVlist = new ArrayList<InvoiceHeader>();
+        ArrayList<InvoiceLine> InvItemList = new ArrayList<InvoiceLine>();
 
-
-        InvoiceTablemodel.setRowCount(0);
-
-
-        ArrayList<InvoiceHeader> InVlist = FileOperations.readFile("DataFiles/InvoiceHeader.csv");
-        for (int i = 0; i < InVlist.size(); i++) {
-            InvoiceTablemodel.addRow(new Object[]{InVlist.get(i).getInvNumber(),
-                    InVlist.get(i).getDate(),InVlist.get(i).getCustomerName(),InVlist.get(i).getTotalAmt()});
-        }
-
-        ArrayList<InvoiceLine> InvItemList = FileOperations.InvItemreadFile("DataFiles/InvoiceLine.csv");
-
-
-        //Adding Items To total Invoice Amount
-        for (int i = 0; i < InvItemList.size(); i++) {
-            for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
-                if ((InvoiceTablemodel.getValueAt(j,0)+"").equals(InvItemList.get(i).getInvNumber()+""))
-                {
-                    Double TableValue = Double.parseDouble(InvoiceTablemodel.getValueAt(j,3).toString());
-                    Double ItemPrice = InvItemList.get(i).getItemFullPrice();
-                    InvoiceTablemodel.setValueAt( TableValue +ItemPrice
-                            ,j,3);
-                }
-            }
-        }
-        for (int i = 0; i < InVlist.size(); i++) {
-            String out =  "Invoice" + InVlist.get(i).getInvNumber()+"\n" +
-                    "{\n" +
-                    "\t" + InVlist.get(i).getDate()+","+InVlist.get(i).getCustomerName()+"\n";
-            for (int j = 0; j < InvItemList.size(); j++) {
-                if (InVlist.get(i).getInvNumber() == InvItemList.get(j).getInvNumber())
-                    out += "\t" + InvItemList.get(j).getItemName()+"," + InvItemList.get(j).getItemPrice()
-                            + ","+ InvItemList.get(j).getQuantity()+ "\n";
-            }
-            out += "}";
-            System.out.println(out);
-        }
+//        InvoiceTablemodel.setRowCount(0);
+//
+//
+//        ArrayList<InvoiceHeader> InVlist = FileOperations.readFile("DataFiles/InvoiceHeader.csv");
+//        for (int i = 0; i < InVlist.size(); i++) {
+//            InvoiceTablemodel.addRow(new Object[]{InVlist.get(i).getInvNumber(),
+//                    InVlist.get(i).getDate(),InVlist.get(i).getCustomerName(),InVlist.get(i).getTotalAmt()});
+//        }
+//
+//        ArrayList<InvoiceLine> InvItemList = FileOperations.InvItemreadFile("DataFiles/InvoiceLine.csv");
+//
+//
+//        //Adding Items To total Invoice Amount
+//        for (int i = 0; i < InvItemList.size(); i++) {
+//            for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
+//                if ((InvoiceTablemodel.getValueAt(j,0)+"").equals(InvItemList.get(i).getInvNumber()+""))
+//                {
+//                    Double TableValue = Double.parseDouble(InvoiceTablemodel.getValueAt(j,3).toString());
+//                    Double ItemPrice = InvItemList.get(i).getItemFullPrice();
+//                    InvoiceTablemodel.setValueAt( TableValue +ItemPrice
+//                            ,j,3);
+//                }
+//            }
+//        }
+//        for (int i = 0; i < InVlist.size(); i++) {
+//            String out =  "Invoice" + InVlist.get(i).getInvNumber()+"\n" +
+//                    "{\n" +
+//                    "\t" + InVlist.get(i).getDate()+","+InVlist.get(i).getCustomerName()+"\n";
+//            for (int j = 0; j < InvItemList.size(); j++) {
+//                if (InVlist.get(i).getInvNumber() == InvItemList.get(j).getInvNumber())
+//                    out += "\t" + InvItemList.get(j).getItemName()+"," + InvItemList.get(j).getItemPrice()
+//                            + ","+ InvItemList.get(j).getQuantity()+ "\n";
+//            }
+//            out += "}";
+//            System.out.println(out);
+//        }
 
         InvoiceTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
             public void valueChanged(ListSelectionEvent event) {
