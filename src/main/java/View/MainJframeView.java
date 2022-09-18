@@ -407,24 +407,44 @@ public class MainJframeView extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                String fileContent = "";
-                ArrayList<InvoiceHeader> EditInvList = new ArrayList<>();
 
-                for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
+                JFrame parentFrame = new JFrame();
 
-                    InvoiceHeader inv = new InvoiceHeader();
-                    inv.setInvNumber(Integer.parseInt(InvoiceTablemodel.getValueAt(j,0).toString()));
-                    inv.setDate(InvoiceTablemodel.getValueAt(j,1).toString());
-                    inv.setCustomerName(InvoiceTablemodel.getValueAt(j,2).toString());
-                    inv.setTotalAmt(Double.parseDouble(InvoiceTablemodel.getValueAt(j,3).toString()));
-                    EditInvList.add(inv);
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Specify a file to save");
+                fileChooser.setSelectedFile(new File("EditedInvoiceHeader.csv"));
+                int userSelection = fileChooser.showSaveDialog(parentFrame);
+
+                if (userSelection == JFileChooser.APPROVE_OPTION) {
+                    File fileToSave = fileChooser.getSelectedFile();
+
+                    String fileContent = "";
+                    ArrayList<InvoiceHeader> EditInvList = new ArrayList<>();
+
+                    for (int j = 0; j < InvoiceTablemodel.getRowCount(); j++) {
+
+                        InvoiceHeader inv = new InvoiceHeader();
+                        inv.setInvNumber(Integer.parseInt(InvoiceTablemodel.getValueAt(j, 0).toString()));
+                        inv.setDate(InvoiceTablemodel.getValueAt(j, 1).toString());
+                        inv.setCustomerName(InvoiceTablemodel.getValueAt(j, 2).toString());
+                        inv.setTotalAmt(Double.parseDouble(InvoiceTablemodel.getValueAt(j, 3).toString()));
+                        EditInvList.add(inv);
+                    }
+                    FileOperations.Write(EditInvList,fileToSave);
                 }
-                FileOperations.Write(EditInvList);
 
+                parentFrame = new JFrame();
 
+                fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Specify a file to save");
+                fileChooser.setSelectedFile(new File("EditedInvoiceLine.csv"));
+                userSelection = fileChooser.showSaveDialog(parentFrame);
 
-                FileOperations.InvItemWrite(InvItemList);
+                if (userSelection == JFileChooser.APPROVE_OPTION) {
+                    File fileToSave = fileChooser.getSelectedFile();
 
+                    FileOperations.InvItemWrite(InvItemList, fileToSave);
+                }
             }
 
         });

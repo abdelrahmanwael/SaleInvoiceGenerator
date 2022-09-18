@@ -57,14 +57,14 @@ public class FileOperations {
         }
         return InvItemList;
     }
-    public static void Write(ArrayList<InvoiceHeader> InvHdrList) {
+    public static void Write(ArrayList<InvoiceHeader> InvHdrList,File  fileToSave) {
         String fileContent = "";
         for (int i = 0; i < InvHdrList.size(); i++) {
             fileContent += InvHdrList.get(i).getInvNumber() + "," + InvHdrList.get(i).getDate() + ","
                     + InvHdrList.get(i).getCustomerName() + "," + InvHdrList.get(i).getTotalAmt() + "\r\n";
         }
         try {
-            String FileName = "DataFiles/InvoiceHeader.csv";
+            String FileName = fileToSave.getPath();
             FileWriter fw = new FileWriter(FileName, false); //the true will append the new data
             fw.write(fileContent);//appends the string to the file
             fw.close();
@@ -73,7 +73,7 @@ public class FileOperations {
 
         }
     }
-    public static void InvItemWrite(ArrayList<InvoiceLine> InvItemList) {
+    public static void InvItemWrite(ArrayList<InvoiceLine> InvItemList,File fileToSave) {
         String fileContent = "";
         for (int j = 0; j < InvItemList.size(); j++) {
             fileContent += ""
@@ -86,7 +86,7 @@ public class FileOperations {
         }
 
         try {
-            String FileName = "DataFiles/InvoiceLine.csv";
+            String FileName = fileToSave.getPath();
             FileWriter fw = new FileWriter(FileName,false); //the true will append the new data
             fw.write(fileContent);//appends the string to the file
             fw.close();
